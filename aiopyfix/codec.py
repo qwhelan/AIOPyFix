@@ -65,7 +65,8 @@ class Codec(object):
                 seqNo = session.allocateSndSeqNo()
 
         body.append("%s=%s" % (self.protocol.fixtags.MsgSeqNum, seqNo))
-        body.append("%s=%s" % (self.protocol.fixtags.SendingTime, self.current_datetime()))
+        if self.protocol.fixtags.SendingTime not in msg:
+            body.append("%s=%s" % (self.protocol.fixtags.SendingTime, self.current_datetime()))
 
         for t in msg.tags:
             self._addTag(body, t, msg)
