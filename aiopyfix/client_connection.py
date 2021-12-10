@@ -28,7 +28,14 @@ class FIXClientConnectionHandler(FIXConnectionHandler):
 
         self.protocol = protocol
 
-        asyncio.ensure_future(self.logon())
+        self.logon_fut = asyncio.ensure_future(self.logon())
+        self.heartbeatTimerRegistration = asyncio.ensure_future(self._sendTestRequest())
+
+    async def _sendTestRequest(self) -> None:
+        await asyncio.wait_for(self.logon_fut, None)
+        while True:
+            await self.sendMsg(self.protocol.messages.Messages.test_request())
+            await asyncio.sleep(self.heartbeatPeriod / 2)
 
     async def logon(self):
         logonMsg = self.protocol.messages.Messages.logon()
