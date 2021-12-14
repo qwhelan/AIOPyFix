@@ -179,10 +179,14 @@ class FIXConnectionHandler(object):
                 responses.append(protocol.messages.Messages.resend_request(lastKnownSeqNo, 0))
                 # we still need to notify if we are processing Logon message
                 if msgType == protocol.msgtype.LOGON:
-                    await self._notifyMessageObservers(decodedMsg, MessageDirection.INBOUND, False)
+                    await self._notifyMessageObservers(
+                        decodedMsg, MessageDirection.INBOUND, persistMessage=False
+                    )
             else:
                 self.session.setRecvSeqNo(recvSeqNo)
-                await self._notifyMessageObservers(decodedMsg, MessageDirection.INBOUND)
+                await self._notifyMessageObservers(
+                    decodedMsg, MessageDirection.INBOUND, persistMessage=False
+                )
 
             for m in responses:
                 await self.sendMsg(m)
@@ -222,7 +226,9 @@ class FIXConnectionHandler(object):
         decodedMsg, junk = self.codec.decode(encodedMsg)
 
         try:
-            await self._notifyMessageObservers(decodedMsg, MessageDirection.OUTBOUND)
+            await self._notifyMessageObservers(
+                decodedMsg, MessageDirection.OUTBOUND, persistMessage=False
+            )
         except DuplicateSeqNoError:
             logging.error("We have sent a message with a duplicate seq no, failed to persist it (MsgSeqNum: %s)" % (decodedMsg[self.codec.protocol.fixtags.MsgSeqNum]))
 
