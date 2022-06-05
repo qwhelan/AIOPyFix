@@ -108,6 +108,7 @@ class FIXClient(FIXEndPoint):
 
     async def start(self, host, port, loop):
         self.reader, self.writer = await asyncio.open_connection(host, port, loop=loop)
+        self.writer.transport.set_write_buffer_limits(0)
         self.addr = (host, port)
         logging.info("Connected to %s" % repr(self.addr))
         connection = FIXClientConnectionHandler(self.engine, self.protocol, self.targetCompId, self.senderCompId,
