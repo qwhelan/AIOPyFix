@@ -4,9 +4,14 @@ import sys
 from aiopyfix.codec import Codec
 from aiopyfix.journaler import DuplicateSeqNoError
 from aiopyfix.message import FIXMessage, MessageDirection
+import logging
 
 from aiopyfix.session import *
 from enum import Enum
+
+
+logger = logging.Logger("foo", level=logging.INFO)
+
 
 class ConnectionState(Enum):
     UNKNOWN = 0
@@ -53,14 +58,28 @@ class FIXConnectionHandler(object):
     async def disconnect(self):
         await self.handle_close()
 
-    async def _notifyMessageObservers(self, msg, direction, persistMessage=True):
-        if persistMessage is True:
-            self.engine.journaller.persistMsg(msg, self.session, direction)
-        for handler in filter(lambda x: (x[1] is None or x[1] == direction) and (x[2] is None or x[2] == msg.msgType),
-                              self.msgHandlers):
-            await handler[0](self, msg)
+    async def _notifyMessageObservers(
+        self, msg: FIXMessage, direction, persistMessage=True
+    ):
 
-    def addMessageHandler(self, handler, direction = None, msgType = None):
+        handled_message = False
+        for handler in filter(
+            lambda x: (x[1] is None or x[1] == direction)
+            and (x[2] is None or x[2] == msg.msgType),
+            self.msgHandlers,
+        ):
+            await handler[0](self, msg)
+            handled_message = True
+
+        protocol = self.codec.protocol
+        if not handled_message and msg.msgType not in [
+            protocol.msgtype.LOGON,
+            protocol.msgtype.TESTREQUEST,
+            protocol.msgtype.HEARTBEAT,
+        ]:
+            logger.critical(f"Did not handle {direction} message: {msg}")
+
+    def addMessageHandler(self, handler, direction=None, msgType=None):
         self.msgHandlers.append((handler, direction, msgType))
 
     def removeMessageHandler(self, handler, direction = None, msgType = None):
@@ -217,7 +236,13 @@ class FIXConnectionHandler(object):
                 await self.observer.notifyDisconnect(self)
 
     async def sendMsg(self, msg):
-        if self.connectionState != ConnectionState.CONNECTED and self.connectionState != ConnectionState.LOGGED_IN:
+        if (
+            self.connectionState != ConnectionState.CONNECTED
+            and self.connectionState != ConnectionState.LOGGED_IN
+        ):
+            logger.critical(
+                f"Dropping message as connectionState={self.connectionState}: {msg}"
+            )
             return
 
         encodedMsg = self.codec.encode(msg, self.session).encode('utf-8')
