@@ -241,7 +241,7 @@ class FIXConnectionHandler(object):
             and self.connectionState != ConnectionState.LOGGED_IN
         ):
             logger.critical(
-                f"Dropping message as connectionState={self.connectionState}: {msg}"
+                f"Dropping message as connectionState={self.connectionState}: msgType={msg.msgType} msgContent={msg}"
             )
             return
 
