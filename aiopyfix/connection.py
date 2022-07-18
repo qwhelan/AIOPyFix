@@ -50,7 +50,7 @@ class FIXConnectionHandler(object):
         self.reader, self.writer = reader, writer
         self.heartbeatTimerRegistration = None
         self.expectedHeartbeatRegistration = None
-        asyncio.ensure_future(self.handle_read())
+        self.read_fut = asyncio.ensure_future(self.handle_read())
 
     def address(self):
         return self.addr
