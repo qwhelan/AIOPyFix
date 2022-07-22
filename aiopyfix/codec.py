@@ -31,7 +31,7 @@ class Codec(object):
     @staticmethod
     def current_datetime() -> str:
         d = datetime.utcnow()
-        return "%d%02d%02d-%02d%02d%02d.%03d" % (
+        return "%d%02d%02d-%02d:%02d:%02d.%03d" % (
             d.year,
             d.month,
             d.day,
