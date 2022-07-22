@@ -25,8 +25,17 @@ class Codec(object):
         )
 
     @staticmethod
-    def current_datetime():
-        return datetime.utcnow().strftime("%Y%m%d-%H:%M:%S.%f")[:-3]
+    def current_datetime() -> str:
+        d = datetime.utcnow()
+        return "%d%02d%02d-%02d%02d%02d.%03d" % (
+            d.year,
+            d.month,
+            d.day,
+            d.hour,
+            d.minute,
+            d.second,
+            d.microsecond // 1000,
+        )
 
     def _addTag(self, body, t, msg):
         if msg.isRepeatingGroup(t):
