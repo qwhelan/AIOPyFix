@@ -1,5 +1,6 @@
 from datetime import datetime
 import logging
+from typing import Tuple
 from aiopyfix.message import FIXMessage, FIXContext
 
 class EncodingError(Exception):
@@ -19,6 +20,9 @@ class Codec(object):
     def __init__(self, protocol):
         self.protocol = protocol
         self.SOH = '\x01'
+        self.repeatingGroupIdentifiers = (
+            self.protocol.fixtags.repeatingGroupIdentifiers()
+        )
 
     @staticmethod
     def current_datetime():
@@ -130,7 +134,7 @@ class Codec(object):
                 # logging.debug("\t" + "|".join(msg))
 
                 repeatingGroups = []
-                repeatingGroupTags = self.protocol.fixtags.repeatingGroupIdentifiers()
+                repeatingGroupTags = self.repeatingGroupIdentifiers
                 currentContext = decodedMsg
 
                 for m in msg:
