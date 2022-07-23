@@ -72,11 +72,16 @@ class FIXConnectionHandler(object):
             handled_message = True
 
         protocol = self.codec.protocol
-        if not handled_message and msg.msgType not in [
-            protocol.msgtype.LOGON,
-            protocol.msgtype.TESTREQUEST,
-            protocol.msgtype.HEARTBEAT,
-        ]:
+        if (
+            not handled_message
+            and msg.msgType
+            not in [
+                protocol.msgtype.LOGON,
+                protocol.msgtype.TESTREQUEST,
+                protocol.msgtype.HEARTBEAT,
+            ]
+            and direction != MessageDirection.OUTBOUND
+        ):
             logger.critical(f"Did not handle {direction} message: {msg}")
 
     def addMessageHandler(self, handler, direction=None, msgType=None):
