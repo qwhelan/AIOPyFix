@@ -10,7 +10,7 @@ from aiopyfix.session import *
 from enum import Enum
 
 
-logger = logging.Logger("foo", level=logging.INFO)
+logger = logging.Logger("aiopyfix.connection", level=logging.INFO)
 
 
 class ConnectionState(Enum):
