@@ -2,6 +2,7 @@ from datetime import datetime
 import logging
 from typing import Tuple
 from aiopyfix.message import FIXMessage, FIXContext
+from aiopyfix.utils import fast_checksum
 
 
 class EncodingError(Exception):
@@ -122,7 +123,7 @@ class Codec(object):
 
         fixmsg = self.SOH.join(header) + self.SOH + body
 
-        cksum = sum([ord(i) for i in list(fixmsg)]) % 256
+        cksum = fast_checksum(fixmsg)
         fixmsg = fixmsg + "%s=%0.3i" % (self.protocol.fixtags.CheckSum, cksum)
 
         # print len(fixmsg)
@@ -189,9 +190,7 @@ class Codec(object):
                         t = "{unknown}"
 
                     if tag == self.protocol.fixtags.CheckSum:
-                        cksum = (
-                            sum([ord(i) for i in list(self.SOH.join(msg[:-1]))]) + 1
-                        ) % 256
+                        cksum = fast_checksum(self.SOH.join(msg[:-1]))
                         if cksum != int(value):
                             logging.warning(
                                 "\tCheckSum: %s (INVALID) expecting %s"
