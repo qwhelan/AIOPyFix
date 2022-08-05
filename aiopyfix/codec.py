@@ -190,7 +190,7 @@ class Codec(object):
                         t = "{unknown}"
 
                     if tag == self.protocol.fixtags.CheckSum:
-                        cksum = fast_checksum(self.SOH.join(msg[:-1]))
+                        cksum = (fast_checksum(self.SOH.join(msg[:-1])) + 1) % 256
                         if cksum != int(value):
                             logging.warning(
                                 "\tCheckSum: %s (INVALID) expecting %s"
