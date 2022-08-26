@@ -160,9 +160,6 @@ class FIXConnectionHandler(object):
                     raise ConnectionError
                 self.msgBuffer = self.msgBuffer + msg
                 while True:
-                    if self.connectionState == ConnectionState.DISCONNECTED:
-                        break
-
                     (decodedMsg, parsedLength) = self.codec.decode(self.msgBuffer)
                     if decodedMsg is None:
                         break
