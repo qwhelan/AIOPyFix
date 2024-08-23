@@ -68,7 +68,10 @@ class FIXConnectionHandler(object):
             and (x[2] is None or x[2] == msg.msgType),
             self.msgHandlers,
         ):
-            await handler[0](self, msg)
+            try:
+                await handler[0](self, msg)
+            except Exception as e:
+                logger.exception(f"Handling of message failed! msg={msg} with {e}")
             handled_message = True
 
         protocol = self.codec.protocol
