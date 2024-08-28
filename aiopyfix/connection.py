@@ -218,7 +218,7 @@ class FIXConnectionHandler(object):
         except SessionWarning as sw:
             logging.warning(sw)
         except SessionError as se:
-            logging.error(se)
+            logging.exception(f"Session error, disconnecting: {se}")
             await self.disconnect()
         except DuplicateSeqNoError:
             try:
