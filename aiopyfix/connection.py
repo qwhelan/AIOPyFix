@@ -4,6 +4,7 @@ import sys
 from aiopyfix.codec import Codec
 from aiopyfix.journaler import DuplicateSeqNoError
 from aiopyfix.message import FIXMessage, MessageDirection
+from aiopyfix.prometheus import DROPPED_SEND
 import logging
 
 from aiopyfix.session import *
@@ -248,6 +249,7 @@ class FIXConnectionHandler(object):
             logger.critical(
                 f"Dropping message as connectionState={self.connectionState}: msgType={msg.msgType} msgContent={msg}"
             )
+            DROPPED_SEND.inc()
             return
 
         encodedMsg = self.codec.encode(msg, self.session).encode('utf-8')
